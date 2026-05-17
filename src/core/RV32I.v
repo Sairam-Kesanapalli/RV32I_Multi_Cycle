@@ -71,9 +71,9 @@ module rv32i_multi_cycle #(
         end
     end
 
-    // For now, to avoid breaking the rest of the datapath while we transition,
-    // we route the combinational mem_instr directly to instr.
-    wire [XLEN-1:0] instr = mem_instr;
+    // The Instruction Register (IR) holds the fetched instruction stable 
+    // across all clock cycles of execution!
+    wire [XLEN-1:0] instr = IR;
 
     // =========================================================================
     // 2. INSTRUCTION DECODE (ID) & CONTROL
@@ -210,8 +210,8 @@ module rv32i_multi_cycle #(
         .clk(clk),
         .MemRead(MemRead),
         .MemWrite(MemWrite),
-        .write_data(read_data2),
-        .addr(ALUOut),
+        .write_data(B),         // Use latched B register instead of combinational read_data2
+        .addr(ALUOut),          // Address comes from ALU calculation in previous cycle
         .read_data(mem_data)
     );
 

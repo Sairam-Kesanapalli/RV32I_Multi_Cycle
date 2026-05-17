@@ -23,7 +23,7 @@ always #5 clk = ~clk;
         rst_n = 0;
          #10;
         rst_n = 1;
-        #2000; // Increased simulation time for multi-cycle!
+       #2000; // Increased simulation time for multi-cycle!
         $finish;
     end
 endmodule
