@@ -1,7 +1,7 @@
 module test_lw_sw;
     reg clk;
     reg rst_n;
-    rv32i_single_cycle rv (
+    rv32i_multi_cycle rv (
         .clk(clk),
         .rst_n(rst_n)
     );

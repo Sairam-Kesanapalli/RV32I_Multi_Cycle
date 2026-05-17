@@ -15,7 +15,7 @@ SRC_MEM = src/memory
 TB_DIR = tb
 
 # Source files
-SOURCES = $(SRC_CORE)/RV32I.v \
+SOURCES = $(SRC_CORE)/rv32i_multi_cycle.v \
           $(SRC_CORE)/control_unit.v \
           $(SRC_CORE)/alu_control.v \
           $(SRC_CORE)/imm_gen.v \
