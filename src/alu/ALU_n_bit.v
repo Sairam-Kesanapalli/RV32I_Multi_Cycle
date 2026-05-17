@@ -1,22 +1,22 @@
 
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 01/16/2026 03:26:46 PM
-// Design Name: 
+// Design Name:
 // Module Name: ALU_n_bit
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -33,17 +33,17 @@ module ALU_n_bit#(
     output reg negative,
     output reg overflow
 );
-    
+
     wire [WIDTH-1:0] add_sol;
 //  wire [WIDTH-1:0] sub_sol;
     wire [WIDTH-1:0] inc_sol;
     wire [WIDTH-1:0] dec_sol;
-    
+
     wire [WIDTH-1:0] and_sol;
     wire [WIDTH-1:0] or_sol;
     wire [WIDTH-1:0] xor_sol;
     wire [WIDTH-1:0] not_sol;
-    
+
     wire [WIDTH-1:0] left_shift_logical_sol;
     wire [WIDTH-1:0] right_shift_logical_sol;
 
@@ -54,7 +54,7 @@ module ALU_n_bit#(
 //  wire sub_out;
 //  wire add_in;
     wire add_out;
-    
+
 //FOR SUBTRACTING LOGIC
     wire sub;
     wire [WIDTH-1:0] b_mux;
@@ -80,7 +80,7 @@ module ALU_n_bit#(
 
 //  assign sub_in = c_in;
 //  assign add_in = c_in;
-    
+
     full_adder_n_bit #(
     .WIDTH(WIDTH)
     )f1(
@@ -93,7 +93,7 @@ module ALU_n_bit#(
 
     assign overflow_wire = ((a[WIDTH-1] == b_mux[WIDTH-1]) && (a[WIDTH-1] != add_sol[WIDTH-1]));
 /*    full_subtractor_n_bit f2#(
-    .WIDTH(WIDTH)                           // INDUSTRIES DO NOT USE SEPERATE SUBTRACT BLOCK 
+    .WIDTH(WIDTH)                           // INDUSTRIES DO NOT USE SEPERATE SUBTRACT BLOCK
     )(
         .a(a),
         .b(b),
@@ -104,19 +104,19 @@ module ALU_n_bit#(
 */
     assign inc_sol = a + 1;
     assign dec_sol = a - 1;
-    
+
     assign and_sol = a & b;
     assign or_sol = a | b;
     assign xor_sol = a ^ b;
     assign not_sol = ~a;
-    
+
     assign left_shift_logical_sol = a << b[4:0];
     assign right_shift_logical_sol = a >> b[4:0];
-    
+
     assign right_shift_arithmetic_sol = $signed(a) >>> b[4:0];
     assign SLT = ($signed(a) < $signed(b))? 32'd1 : 32'd0;
     always @(*) begin
-    
+
     overflow = 1'b0;
     answer = {WIDTH{1'b0}};
     c_out  = 1'b0;
@@ -124,17 +124,17 @@ module ALU_n_bit#(
     case(op_code)
 
         4'd0,
-        4'd1 : begin 
+        4'd1 : begin
                     answer = add_sol;
                     c_out = add_out;
                     overflow = overflow_wire;
                end
         4'd2 : answer = inc_sol;
-	    4'd3 : answer = dec_sol;	                
+        4'd3 : answer = dec_sol;
         4'd4 : answer = and_sol;
         4'd5 : answer = or_sol;
         4'd6 : answer = xor_sol;
-        4'd7 : answer = not_sol;       
+        4'd7 : answer = not_sol;
         4'd8 : answer = left_shift_logical_sol;
         4'd9 : answer = right_shift_logical_sol;
         4'd10: answer = right_shift_arithmetic_sol;

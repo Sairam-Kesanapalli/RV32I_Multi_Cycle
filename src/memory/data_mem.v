@@ -18,14 +18,14 @@ module data_mem #(
     // SYNCHRONOUS WRITE
     always @(posedge clk) begin
         if(MemWrite)
-            memory[addr[ADDR_WIDTH+1:2]] <= write_data; 
+            memory[addr[ADDR_WIDTH+1:2]] <= write_data;
     end
 
     // COMBINATIONAL READ
     always @(*) begin
         if(MemRead)
-            read_data = memory[addr[ADDR_WIDTH+1:2]]; 
-        else 
+            read_data = memory[addr[ADDR_WIDTH+1:2]];
+        else
             read_data = {XLEN{1'b0}};
     end
 
@@ -45,6 +45,6 @@ module data_mem #(
     // NOTE:
     // If we implement LB (Load Byte) or LH (Load Halfword),
     // we cannot ignore addr[1:0] anymore.
-    // Those bits are required to select the correct byte or halfword inside the 32-bit word.                                
+    // Those bits are required to select the correct byte or halfword inside the 32-bit word.
 
-endmodule    
+endmodule

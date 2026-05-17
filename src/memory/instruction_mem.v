@@ -50,7 +50,7 @@ module instruction_memory #(
         instr_memory[34]  = 32'h000d8e67;
         instr_memory[35]  = 32'h07b00e93;
         instr_memory[36]  = 32'h04d00e93;
-    end  
+    end
 
     assign instr = instr_memory[addr[ADDR_WIDTH+1:2]];
 

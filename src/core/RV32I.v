@@ -52,7 +52,7 @@ module rv32i_single_cycle #(
     wire [1:0] ALUSrcA_ctrl;
     wire [1:0] ALUSrcB_ctrl;
     wire [1:0] PCSource_ctrl;
-    
+
     always @(posedge clk) begin
         if (!rst_n) begin
             IR <= 32'b0;
@@ -62,7 +62,7 @@ module rv32i_single_cycle #(
             ALUOut <= 32'b0;
         end else begin
             if (IRWrite) IR <= mem_instr;
-            
+
             // Unconditionally update architectural state registers
             MDR <= mem_data;
             A <= read_data1;
@@ -71,7 +71,7 @@ module rv32i_single_cycle #(
         end
     end
 
-    // For now, to avoid breaking the rest of the datapath while we transition, 
+    // For now, to avoid breaking the rest of the datapath while we transition,
     // we route the combinational mem_instr directly to instr.
     wire [XLEN-1:0] instr = mem_instr;
 
@@ -96,7 +96,7 @@ module rv32i_single_cycle #(
         .rst_n(rst_n),
         .op_code(opcode),
         .branch_taken(branch_taken),
-        
+
         .PCWrite(PCWrite),
         .IRWrite(IRWrite),
         .RegWrite(RegWrite),
@@ -137,7 +137,7 @@ module rv32i_single_cycle #(
         .instr(instr),
         .imm_out(imm_out)
     );
-    
+
     // =========================================================================
     // 4. EXECUTE (ALU)
     // =========================================================================
@@ -151,8 +151,8 @@ module rv32i_single_cycle #(
         .alu_op(alu_op)
     );
 
-    wire [XLEN-1:0] alu_input_b; 
-    wire [XLEN-1:0] alu_input_a; 
+    wire [XLEN-1:0] alu_input_b;
+    wire [XLEN-1:0] alu_input_a;
     wire [XLEN-1:0] alu_result;
     wire zero_flag, carry_out, negative, overflow;
 
@@ -163,13 +163,13 @@ module rv32i_single_cycle #(
     // 2'b00 -> PC (For Fetching, Jumps, Branches)
     // 2'b01 -> A Register (For Arithmetic, Memory Addresses)
     // 2'b10 -> 0 (For LUI instruction)
-    
-    assign alu_input_a = 
+
+    assign alu_input_a =
             (ALUSrcA_ctrl == 2'b00) ? PC :
             (ALUSrcA_ctrl == 2'b01) ? A :
             (ALUSrcA_ctrl == 2'b10) ? 32'b0 :
             A;
-             
+
     // ---------------------------------------------------------
     // MULTI-CYCLE MUX: ALUSrcB
     // ---------------------------------------------------------
@@ -177,8 +177,8 @@ module rv32i_single_cycle #(
     // 2'b00 -> B Register (For R-Type instructions)
     // 2'b01 -> Constant 4 (For PC + 4 during Fetch stage)
     // 2'b10 -> Immediate (For I-Type, S-Type, Jumps, and Branches)
-    
-    assign alu_input_b = 
+
+    assign alu_input_b =
             (ALUSrcB_ctrl == 2'b00) ? B :
             (ALUSrcB_ctrl == 2'b01) ? 32'd4 :
             (ALUSrcB_ctrl == 2'b10) ? imm_out :
@@ -202,15 +202,15 @@ module rv32i_single_cycle #(
     // =========================================================================
     // 5. MEMORY ACCESS (MEM) & WRITE-BACK (WB)
     // =========================================================================
-    wire [XLEN-1:0] mem_data; 
-    
-    // Memory module for Load/Store operations. 
+    wire [XLEN-1:0] mem_data;
+
+    // Memory module for Load/Store operations.
     // E.g., [SW x8, 4(x2)] => Memory[x2 + 4] = x8
     data_mem dm(
         .clk(clk),
         .MemRead(MemRead),
         .MemWrite(MemWrite),
-        .write_data(read_data2),        
+        .write_data(read_data2),
         .addr(alu_result),
         .read_data(mem_data)
     );
@@ -232,7 +232,7 @@ module rv32i_single_cycle #(
             3'b101 : branch_taken = ~(negative ^ overflow);         // BGE  (Signed)
             3'b110 : branch_taken = ~carry_out;                     // BLTU (Unsigned)
             3'b111 : branch_taken = carry_out;                      // BGEU (Unsigned)
-       	    default: branch_taken = 0;
+            default: branch_taken = 0;
         endcase
     end
 
@@ -244,7 +244,7 @@ module rv32i_single_cycle #(
     // 2'b01 -> ALUOut (Used for Jumps/Branches to write target calculated in previous cycle)
     // 2'b10 -> alu_result with LSB set to 0 (Specifically for JALR)
 
-    assign PC_next = 
+    assign PC_next =
             (PCSource_ctrl == 2'b00) ? alu_result :
             (PCSource_ctrl == 2'b01) ? ALUOut :
             (PCSource_ctrl == 2'b10) ? (alu_result & 32'hFFFFFFFE) : // JALR masking
@@ -255,7 +255,7 @@ module rv32i_single_cycle #(
         if(!rst_n)
             PC <= 0;
         else if (PCWrite)
-            PC <= PC_next; 
+            PC <= PC_next;
     end
 
 endmodule

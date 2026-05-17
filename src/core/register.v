@@ -7,11 +7,11 @@ module register_file #(
     input rst_n,                // Reset is included for safe initialization.
 // In industry, datapath registers may avoid reset for area/power optimization,
 // but control logic and PC typically use reset.
-                        
+
     input reg_write,
     input [ADDR_WIDTH-1:0] rd,              // DESTINATION REGISTER FOR WRITING DATA
-    input [DATA_WIDTH-1:0] write_data,     
-    
+    input [DATA_WIDTH-1:0] write_data,
+
     input [ADDR_WIDTH-1:0] rs1,             // SOURCE REGISTER 1 FOR READING DATA
     input [ADDR_WIDTH-1:0] rs2,             // SOURCE REGISTER 2 FOR READING DATA
 
@@ -22,15 +22,15 @@ module register_file #(
         // REGISTER
 reg [DATA_WIDTH-1:0] regs [0:REG_DEPTH-1];
 
-        // WRITE LOGIC 
+        // WRITE LOGIC
 always @(posedge clk) begin
-    if(!rst_n) begin       
+    if(!rst_n) begin
         for(integer i =0; i<REG_DEPTH; i++)
             regs[i] <= {DATA_WIDTH{1'b0}};
     end
     else begin
-        if(reg_write && rd!=0) 
-            regs[rd] <= write_data;  
+        if(reg_write && rd!=0)
+            regs[rd] <= write_data;
     end
 end
 
