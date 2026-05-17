@@ -46,6 +46,13 @@ module rv32i_multi_cycle #(
     reg [XLEN-1:0] B;       // Register File Output 2
     reg [XLEN-1:0] ALUOut;  // ALU Result Register
 
+    // Pre-declare datapath wires used by state registers and control unit
+    reg branch_taken;
+    wire [XLEN-1:0] mem_data;
+    wire [XLEN-1:0] read_data1;
+    wire [XLEN-1:0] read_data2;
+    wire [XLEN-1:0] alu_result;
+
     // Control signals from FSM
     wire IRWrite;
     wire PCWrite;
@@ -115,8 +122,6 @@ module rv32i_multi_cycle #(
     // 3. REGISTER FILE & IMMEDIATE GENERATION
     // =========================================================================
     wire [XLEN-1:0] write_data;
-    wire [XLEN-1:0] read_data1;
-    wire [XLEN-1:0] read_data2;
 
     // Read values from rs1 and rs2. If the instruction writes back, it saves to rd.
     register_file rf(
@@ -153,7 +158,6 @@ module rv32i_multi_cycle #(
 
     wire [XLEN-1:0] alu_input_b;
     wire [XLEN-1:0] alu_input_a;
-    wire [XLEN-1:0] alu_result;
     wire zero_flag, carry_out, negative, overflow;
 
     // ---------------------------------------------------------
@@ -202,7 +206,6 @@ module rv32i_multi_cycle #(
     // =========================================================================
     // 5. MEMORY ACCESS (MEM) & WRITE-BACK (WB)
     // =========================================================================
-    wire [XLEN-1:0] mem_data;
 
     // Memory module for Load/Store operations.
     // E.g., [SW x8, 4(x2)] => Memory[x2 + 4] = x8
@@ -222,7 +225,7 @@ module rv32i_multi_cycle #(
     // =========================================================================
     // 6. PC UPDATE (BRANCHING & JUMPING LOGIC)
     // =========================================================================
-    reg branch_taken;
+    
     always @(*) begin
         // Evaluate the branch condition based on the ALU flags.
         case(funct3)
