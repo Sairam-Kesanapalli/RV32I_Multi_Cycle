@@ -81,7 +81,7 @@ module control_unit (
             end
             MEM_READ:  next_state = MEM_WB;
             MEM_WB:    next_state = FETCH;
-            MEM_WRITE: next_state = PC_INC;
+            MEM_WRITE: next_state = FETCH;
             BRANCH_EX: begin
                 if (branch_taken) next_state = FETCH;
                 else next_state = PC_INC;
@@ -172,6 +172,13 @@ module control_unit (
 
             MEM_WRITE: begin
                 MemWrite = 1;
+
+                // Concurrent PC+4 Increment!
+                ALUSrcA_ctrl = 2'b00; // PC
+                ALUSrcB_ctrl = 2'b01; // 4
+                ALU_OP       = 3'd3;  // ADD
+                PCSource_ctrl= 2'b00; // alu_result
+                PCWrite      = 1;
             end
 
             BRANCH_EX: begin
