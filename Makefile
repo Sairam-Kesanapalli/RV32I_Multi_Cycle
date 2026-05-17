@@ -32,8 +32,9 @@ TB_DEBUG = $(TB_DIR)/test_lw_sw.v
 # Output binaries
 OUT_MAIN = rv32i_sim
 OUT_DEBUG = debug_sim
+OUT_SVT = svt_sim
 
-.PHONY: all compile sim clean debug
+.PHONY: all compile sim clean debug svt svt_golden
 
 all: compile sim
 
@@ -50,6 +51,15 @@ debug:
 	$(CC) $(CFLAGS) -o $(OUT_DEBUG) $(TB_DEBUG) $(SOURCES)
 	$(SIM) $(OUT_DEBUG)
 
+# Generate golden hex files from Python ISS
+svt_golden:
+	python3 scripts/golden_model.py
+
+# Compile and run Software Verification Testbench
+svt: svt_golden
+	$(CC) $(CFLAGS) -o $(OUT_SVT) tb/svt_tb.v $(SOURCES)
+	$(SIM) $(OUT_SVT)
+
 # Clean up generated files
 clean:
-	rm -f $(OUT_MAIN) $(OUT_DEBUG) *.vcd
+	rm -f $(OUT_MAIN) $(OUT_DEBUG) $(OUT_SVT) golden_sim *.vcd tb/expected_*.hex
