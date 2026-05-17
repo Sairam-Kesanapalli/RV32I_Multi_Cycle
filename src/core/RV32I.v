@@ -15,7 +15,7 @@
  *    +-----------------+------------+--------------+---> Write Back to Registers
  *
  *********************************************************************************/
-module rv32i_single_cycle #(
+module rv32i_multi_cycle #(
     parameter XLEN = 32
 )(
     input clk,

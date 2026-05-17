@@ -38,10 +38,8 @@ module control_unit (
     localparam MEM_WRITE  = 4'd7;
     localparam BRANCH_EX  = 4'd8;
     localparam JUMP_EX    = 4'd9;
-    localparam LUI_EX     = 4'd10;
-    localparam AUIPC_EX   = 4'd11;
-    localparam JALR_EX    = 4'd12;
-    localparam PC_INC     = 4'd13;
+    localparam JALR_EX    = 4'd10;
+    localparam PC_INC     = 4'd11;
 
     reg [3:0] current_state, next_state;
 
@@ -68,8 +66,8 @@ module control_unit (
                     7'b1100011: next_state = BRANCH_EX;
                     7'b1101111: next_state = JUMP_EX;  // JAL
                     7'b1100111: next_state = JALR_EX;  // JALR
-                    7'b0110111: next_state = LUI_EX;
-                    7'b0010111: next_state = AUIPC_EX;
+                    7'b0110111: next_state = PC_INC;   // LUI   (Optimized: Skip EXEC state)
+                    7'b0010111: next_state = PC_INC;   // AUIPC (Optimized: Skip EXEC state)
                     default: next_state = FETCH;
                 endcase
             end
@@ -87,8 +85,6 @@ module control_unit (
                 else next_state = PC_INC;
             end
             JUMP_EX:   next_state = FETCH;
-            LUI_EX:    next_state = PC_INC;
-            AUIPC_EX:  next_state = PC_INC;
             JALR_EX:   next_state = FETCH;
             PC_INC:    next_state = FETCH;
             default:   next_state = FETCH;
@@ -125,8 +121,13 @@ module control_unit (
                     ALUSrcA_ctrl = 2'b00; // PC
                     ALUSrcB_ctrl = 2'b01; // 4
                     ALU_OP       = 3'd3;  // ADD
+                end else if (op_code == 7'b0110111) begin
+                    // LUI Optimization: Compute 0 + imm early in DECODE!
+                    ALUSrcA_ctrl = 2'b10; // 0
+                    ALUSrcB_ctrl = 2'b10; // imm
+                    ALU_OP       = 3'd3;  // ADD
                 end else begin
-                    // Compute branch target early: ALUOut = PC + imm
+                    // AUIPC, Branches, Memory: Compute target early! ALUOut = PC + imm
                     ALUSrcA_ctrl = 2'b00; // PC
                     ALUSrcB_ctrl = 2'b10; // imm
                     ALU_OP       = 3'd3;  // ADD
@@ -215,18 +216,6 @@ module control_unit (
                 Jump         = 1;
                 PCSource_ctrl= 2'b10; // alu_result & ~1
                 PCWrite      = 1;
-            end
-
-            LUI_EX: begin
-                // ALUOut = 0 + imm
-                ALUSrcA_ctrl = 2'b10; // 0
-                ALUSrcB_ctrl = 2'b10; // imm
-                ALU_OP       = 3'd3;  // ADD
-            end
-
-            AUIPC_EX: begin
-                // ALUOut = PC + imm (Already computed in DECODE!)
-                // So we can just go straight to PC_INC and write back ALUOut!
             end
 
             PC_INC: begin

@@ -4,7 +4,7 @@ reg clk;
 reg rst_n;
 
 
-rv32i_single_cycle rv (
+rv32i_multi_cycle rv (
     .clk(clk),
     .rst_n(rst_n)
 );
@@ -23,7 +23,7 @@ always #5 clk = ~clk;
         rst_n = 0;
          #10;
         rst_n = 1;
-        #400;
+        #2000; // Increased simulation time for multi-cycle!
         $finish;
     end
 endmodule
