@@ -123,22 +123,24 @@ make            # Compile and run the basic testbench
 make svt        # Auto-generates golden model → compiles → simulates → compares
 ```
 
+### Run the CI Regression Suite
+```bash
+make regression # Runs automated testing for all test folders (I-Type, R-Type, U-Type, J-Type)
+```
+
 Expected output on success:
 ```
 =======================================================
-          SOFTWARE VERIFICATION TESTBENCH (SVT)
+              RUNNING REGRESSION SUITE                 
 =======================================================
-
-[PASS] PC matches: 00400074
-
---- Register Checks ---
-[PASS] All 32 Registers match expected values!
-
---- Memory Checks ---
-[PASS] Memory entries match expected values!
-
-=======================================================
-                    [SVT PASS]
+Running tests/I-Type...
+[PASS] I-Type
+Running tests/J-Type...
+[PASS] J-Type
+Running tests/R-Type...
+[PASS] R-Type
+Running tests/U-Type...
+[PASS] U-Type
 =======================================================
 ```
 
@@ -156,6 +158,31 @@ make clean      # Remove all generated files (binaries, VCD, hex)
 gtkwave RV32I_verification.vcd    # Main testbench waveform
 gtkwave SVT_verification.vcd      # SVT testbench waveform
 ```
+
+---
+
+## Continuous Integration (CI) & Regression Testing
+
+To ensure code stability and facilitate rapid hardware iteration, a robust, automated Regression Testing and Continuous Integration system has been established.
+
+### 1. Regression Suite Structure
+Individual tests are placed under the `tests/` directory:
+- **`tests/I-Type`**: Immediate-register arithmetic and logical operations (`ADDI`, `SLLI`, `SLTI`, etc.).
+- **`tests/R-Type`**: Register-register operations (`ADD`, `SUB`, `SLL`, `XOR`, etc.).
+- **`tests/U-Type`**: Upper immediate instructions (`LUI`, `AUIPC`).
+- **`tests/J-Type`**: Unconditional Jumps (`JAL`).
+
+Each subdirectory contains a **`program.hex`** file containing the compiled raw hexadecimal instructions. When you run `make regression`:
+1. The Python Instruction Set Simulator (ISS) evaluates the hex file.
+2. It auto-generates `expected_regs.hex`, `expected_mem.hex`, and `expected_pc.hex` directly inside that test's directory.
+3. The RTL simulator dynamically loads the program via `$readmemh` (using the `+TEST_DIR` argument), simulates, and compares actual outputs vs expected outputs.
+
+### 2. GitHub Actions Integration
+A GitHub Actions workflow (`.github/workflows/makefile.yml`) is fully integrated. On every `push` or `pull_request` to the `main` branch, the CI:
+1. Provisions a clean Ubuntu environment.
+2. Installs `iverilog` and `python3`.
+3. Runs `make svt` and `make regression`.
+4. Uses exit-status code tracking (`exit $$failed`) to block buggy merges or commits from entering the main codebase.
 
 ---
 
